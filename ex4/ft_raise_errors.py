@@ -26,7 +26,7 @@ low (min 10)\n")
 is too hight (max 12)\n")
                 if (sunlight_hours < 2):
                     raise ValueError(f"Error: Sunlight hours {sunlight_hours} \
-is too low (max 2)\n")
+is too low (min 2)\n")
                 print(f"Plant '{plant_name}' is healthy !\n")
             except ValueError as e:
                 print(e)

@@ -15,7 +15,8 @@ class SunlightHoursError(GardenError):
 
 
 class Plant():
-    def __init__(self, plant_name: str, water_level: int, sunlight_hours: int) -> None:
+    def __init__(self, plant_name: str, water_level: int,
+                 sunlight_hours: int) -> None:
         self.name = plant_name
         self.water_level = water_level
         self.sunlight_hours = sunlight_hours
@@ -46,8 +47,9 @@ class Plant():
 
 
 class GardenManeger():
-    def __init__(self):
+    def __init__(self, tank_water_level):
         self.content = {}
+        self.water_tank_level = tank_water_level
 
     @property
     def content(self) -> dict:
@@ -56,6 +58,14 @@ class GardenManeger():
     @content.setter
     def content(self, new_content: dict) -> dict:
         self.__content = new_content
+
+    @property
+    def water_tank_level(self) -> int:
+        return (self.__water_tank_level)
+
+    @water_tank_level.setter
+    def water_tank_level(self, new_level) -> None:
+        self.__water_tank_level = new_level
 
     def add_plant(self, plant: Plant) -> None:
         try:
@@ -70,19 +80,55 @@ cannot be empty !")
     def water_plants(self) -> None:
         print("Opening watering system")
         try:
+            if (self.content == {}):
+                raise Exception("Error: Cannot water - no plant in the garden")
             plant: Plant
             for plant in self.content.values():
-                plant.name + "42"
-                print(f"Watering {plant}")
-
-        except TypeError:
-            print(f"Error: Cannot water {plant} - invalide plant")
+                print(f"Watering {plant.name} - success")
+        except Exception as e:
+            print(e)
         finally:
             print("Closing watering system (cleanup)")
 
+    def checking_plant_health(self) -> None:
+        try:
+            plant: Plant
+            for plant in self.content.values():
+                if (plant.water_level > 10):
+                    raise WaterLevelError(f"Error cheaking {plant.name}: \
+Water level {plant.water_level} is too hight (max 10)\n")
+                if (plant.water_level < 1):
+                    raise WaterLevelError(f"Error cheaking {plant.name}: \
+Water level {plant.water_level} is too hight (min 1)\n")
+                if (plant.sunlight_hours > 12):
+                    raise SunlightHoursError(f"Error cheaking {plant.name}: \
+Sunlight hours {plant.sunlight_hours} is too hight (max 12)\n")
+                if (plant.sunlight_hours < 2):
+                    raise SunlightHoursError(f"Error cheaking {plant.name}: \
+Sunlight hours {plant.sunlight_hours} is too hight (min 2)\n")
+                print(f"{plant.name}: healthy (water: {plant.water_level}, \
+sun: {plant.sunlight_hours})")
+        except GardenError as e:
+            print(e)
+
+    def error_recovery(self):
+        try:
+            if (self.content == {}):
+                raise Exception("Error: Cannot water - no plant in the garden")
+            try:
+                if (self.water_tank_level < 200):
+                    raise WaterLevelError("Not enough water in tank")
+            except WaterLevelError as e:
+                print(f"Caught GardenError: {e}")
+        except Exception as e:
+            print(e)
+        finally:
+            print("System recovered and continuig...")
+
 
 if (__name__ == "__main__"):
-    garden1 = GardenManeger()
+    garden1 = GardenManeger(100)
+    garden2 = GardenManeger(100)
 
     print("=== Garden Management System ===\n")
 
@@ -93,4 +139,13 @@ if (__name__ == "__main__"):
 
     print("\nWatering plants...")
     garden1.water_plants()
+    # garden2.water_plants()
 
+    print("\nCheaking plant health...")
+    garden1.checking_plant_health()
+
+    print("\nTesting error recovery...")
+    garden1.error_recovery()
+    # garden2.error_recovery()
+
+    print("\nGarden managment system test complete !")
